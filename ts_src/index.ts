@@ -70,7 +70,7 @@ function salt(password?: string): string {
 }
 
 export function mnemonicToSeedSync(
-  mnemonic: string,
+  mnemonic: string | Buffer,
   password?: string,
 ): Buffer {
   const mnemonicBuffer =
@@ -260,7 +260,6 @@ export function validateMnemonic(
   try {
     mnemonicToEntropy(mnemonic, wordlist);
   } catch (e) {
-    console.log('could not validate mnemonic', e);
     return false;
   }
 

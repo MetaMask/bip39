@@ -182,7 +182,6 @@ function validateMnemonic(mnemonic, wordlist) {
         mnemonicToEntropy(mnemonic, wordlist);
     }
     catch (e) {
-        console.log('could not validate mnemonic', e);
         return false;
     }
     return true;
