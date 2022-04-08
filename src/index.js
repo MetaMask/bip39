@@ -153,8 +153,10 @@ function entropyToMnemonic(entropy, wordlist) {
         const shouldAddSeparator = i < wordsAsBuffers.length - 1;
         return bufferSize + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0);
     }, 0);
-    const separator = wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' ? '\u3000' : ' ';
-    const result = wordsAsBuffers.reduce(function (result, wordAsBuffer, i) {
+    const separator = wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
+        ? '\u3000'
+        : ' ';
+    const { workingBuffer } = wordsAsBuffers.reduce(function (result, wordAsBuffer, i) {
         const shouldAddSeparator = i < wordsAsBuffers.length - 1;
         result.workingBuffer.set(wordAsBuffer, result.offset);
         if (shouldAddSeparator) {
@@ -165,7 +167,7 @@ function entropyToMnemonic(entropy, wordlist) {
             offset: result.offset + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0),
         };
     }, { workingBuffer: Buffer.alloc(bufferSize), offset: 0 });
-    return result.workingBuffer;
+    return workingBuffer;
 }
 exports.entropyToMnemonic = entropyToMnemonic;
 function generateMnemonic(strength, rng, wordlist) {

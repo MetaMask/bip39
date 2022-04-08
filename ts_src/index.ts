@@ -214,9 +214,16 @@ export function entropyToMnemonic(
   0);
 
   const separator =
-    wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' ? '\u3000' : ' ';
-  const result = wordsAsBuffers.reduce(
-    function(result: any, wordAsBuffer: Buffer, i) {
+    wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
+      ? '\u3000'
+      : ' ';
+
+  const { workingBuffer }: { workingBuffer: Buffer } = wordsAsBuffers.reduce(
+    function(
+      result: { workingBuffer: Buffer; offset: number },
+      wordAsBuffer: Buffer,
+      i: number,
+    ) {
       const shouldAddSeparator = i < wordsAsBuffers.length - 1;
       result.workingBuffer.set(wordAsBuffer, result.offset);
       if (shouldAddSeparator) {
@@ -236,7 +243,7 @@ export function entropyToMnemonic(
     { workingBuffer: Buffer.alloc(bufferSize), offset: 0 },
   );
 
-  return result.workingBuffer;
+  return workingBuffer;
 }
 
 export function generateMnemonic(
