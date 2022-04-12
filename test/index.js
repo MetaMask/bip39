@@ -30,7 +30,7 @@ function testVector (description, wordlist, password, v, i) {
 }
 
 vectors.english.forEach(function (v, i) { testVector('English', undefined, 'TREZOR', v, i) })
-// vectors.japanese.forEach(function (v, i) { testVector('Japanese', WORDLISTS.japanese, '㍍ガバヴァぱばぐゞちぢ十人十色', v, i) })
+vectors.japanese.forEach(function (v, i) { testVector('Japanese', WORDLISTS.japanese, '㍍ガバヴァぱばぐゞちぢ十人十色', v, i) })
 vectors.custom.forEach(function (v, i) { testVector('Custom', WORDLISTS.custom, undefined, v, i) })
 
 test('getDefaultWordlist returns "english"', function (t) {

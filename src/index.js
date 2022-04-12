@@ -149,22 +149,27 @@ function entropyToMnemonic(entropy, wordlist) {
         wordlist = wordlist || [];
         return Buffer.from(wordlist[index], 'utf8');
     });
-    const bufferSize = wordsAsBuffers.reduce((currentBufferSize, wordAsBuffer, i) => {
-        const shouldAddSeparator = i < wordsAsBuffers.length - 1;
-        return (currentBufferSize + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0));
-    }, 0);
     const separator = wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
         ? '\u3000'
         : ' ';
+    const separatorByteLength = Buffer.from(separator, 'utf8').length;
+    const bufferSize = wordsAsBuffers.reduce((currentBufferSize, wordAsBuffer, i) => {
+        const shouldAddSeparator = i < wordsAsBuffers.length - 1;
+        return (currentBufferSize +
+            wordAsBuffer.length +
+            (shouldAddSeparator ? separatorByteLength : 0));
+    }, 0);
     const { workingBuffer } = wordsAsBuffers.reduce((result, wordAsBuffer, i) => {
         const shouldAddSeparator = i < wordsAsBuffers.length - 1;
         result.workingBuffer.set(wordAsBuffer, result.offset);
         if (shouldAddSeparator) {
-            result.workingBuffer.write(separator, result.offset + wordAsBuffer.length, separator.length, 'utf8');
+            result.workingBuffer.write(separator, result.offset + wordAsBuffer.length, separatorByteLength, 'utf8');
         }
         return {
             workingBuffer: result.workingBuffer,
-            offset: result.offset + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0),
+            offset: result.offset +
+                wordAsBuffer.length +
+                (shouldAddSeparator ? separatorByteLength : 0),
         };
     }, { workingBuffer: Buffer.alloc(bufferSize), offset: 0 });
     return workingBuffer;
