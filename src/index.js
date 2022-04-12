@@ -50,9 +50,7 @@ function salt(password) {
     return 'mnemonic' + (password || '');
 }
 function mnemonicToSeedSync(mnemonic, password) {
-    const mnemonicBuffer = typeof mnemonic === 'string'
-        ? Buffer.from(normalize(mnemonic), 'utf8')
-        : mnemonic;
+    const mnemonicBuffer = Buffer.from(normalize(typeof mnemonic === 'string' ? mnemonic : mnemonic.toString()), 'utf8');
     const saltBuffer = Buffer.from(salt(normalize(password)), 'utf8');
     return pbkdf2_1.pbkdf2Sync(mnemonicBuffer, saltBuffer, 2048, 64, 'sha512');
 }
@@ -70,9 +68,7 @@ function mnemonicToEntropy(mnemonic, wordlist) {
     if (!wordlist) {
         throw new Error(WORDLIST_REQUIRED);
     }
-    const mnemonicAsBuffer = typeof mnemonic === 'string'
-        ? Buffer.from(normalize(mnemonic), 'utf8')
-        : mnemonic;
+    const mnemonicAsBuffer = Buffer.from(normalize(typeof mnemonic === 'string' ? mnemonic : mnemonic.toString()), 'utf8');
     const words = [];
     let currentWord = [];
     for (const byte of mnemonicAsBuffer.values()) {
