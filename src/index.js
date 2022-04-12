@@ -149,14 +149,14 @@ function entropyToMnemonic(entropy, wordlist) {
         wordlist = wordlist || [];
         return Buffer.from(wordlist[index], 'utf8');
     });
-    const bufferSize = wordsAsBuffers.reduce(function (bufferSize, wordAsBuffer, i) {
+    const bufferSize = wordsAsBuffers.reduce((currentBufferSize, wordAsBuffer, i) => {
         const shouldAddSeparator = i < wordsAsBuffers.length - 1;
-        return bufferSize + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0);
+        return (currentBufferSize + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0));
     }, 0);
     const separator = wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
         ? '\u3000'
         : ' ';
-    const { workingBuffer } = wordsAsBuffers.reduce(function (result, wordAsBuffer, i) {
+    const { workingBuffer } = wordsAsBuffers.reduce((result, wordAsBuffer, i) => {
         const shouldAddSeparator = i < wordsAsBuffers.length - 1;
         result.workingBuffer.set(wordAsBuffer, result.offset);
         if (shouldAddSeparator) {
