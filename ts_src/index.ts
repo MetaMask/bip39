@@ -203,15 +203,15 @@ export function entropyToMnemonic(
     },
   );
 
-  const bufferSize = wordsAsBuffers.reduce(function(
-    bufferSize,
-    wordAsBuffer,
-    i,
-  ) {
-    const shouldAddSeparator = i < wordsAsBuffers.length - 1;
-    return bufferSize + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0);
-  },
-  0);
+  const bufferSize = wordsAsBuffers.reduce(
+    (currentBufferSize: number, wordAsBuffer: Buffer, i: number): number => {
+      const shouldAddSeparator = i < wordsAsBuffers.length - 1;
+      return (
+        currentBufferSize + wordAsBuffer.length + (shouldAddSeparator ? 1 : 0)
+      );
+    },
+    0,
+  );
 
   const separator =
     wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
@@ -219,11 +219,11 @@ export function entropyToMnemonic(
       : ' ';
 
   const { workingBuffer }: { workingBuffer: Buffer } = wordsAsBuffers.reduce(
-    function(
+    (
       result: { workingBuffer: Buffer; offset: number },
       wordAsBuffer: Buffer,
       i: number,
-    ) {
+    ): { workingBuffer: Buffer; offset: number } => {
       const shouldAddSeparator = i < wordsAsBuffers.length - 1;
       result.workingBuffer.set(wordAsBuffer, result.offset);
       if (shouldAddSeparator) {
