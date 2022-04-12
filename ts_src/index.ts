@@ -69,14 +69,16 @@ function salt(password?: string): string {
   return 'mnemonic' + (password || '');
 }
 
+// When the mnemonic argument is passed as a buffer, it should be
+// a buffer of a string that is normalized to NFKD format
 export function mnemonicToSeedSync(
   mnemonic: string | Buffer,
   password?: string,
 ): Buffer {
-  const mnemonicBuffer = Buffer.from(
-    normalize(typeof mnemonic === 'string' ? mnemonic : mnemonic.toString()),
-    'utf8',
-  );
+  const mnemonicBuffer =
+    typeof mnemonic === 'string'
+      ? Buffer.from(normalize(mnemonic), 'utf8')
+      : mnemonic;
 
   const saltBuffer = Buffer.from(salt(normalize(password)), 'utf8');
 
@@ -96,6 +98,8 @@ export function mnemonicToSeed(
   );
 }
 
+// When the mnemonic argument is passed as a buffer, it should be
+// a buffer of a string that is normalized to NFKD format
 export function mnemonicToEntropy(
   mnemonic: string | Buffer,
   wordlist?: string[],
@@ -105,10 +109,10 @@ export function mnemonicToEntropy(
     throw new Error(WORDLIST_REQUIRED);
   }
 
-  const mnemonicAsBuffer = Buffer.from(
-    normalize(typeof mnemonic === 'string' ? mnemonic : mnemonic.toString()),
-    'utf8',
-  );
+  const mnemonicAsBuffer =
+    typeof mnemonic === 'string'
+      ? Buffer.from(normalize(mnemonic), 'utf8')
+      : mnemonic;
 
   const words = [];
   let currentWord = [];
@@ -200,7 +204,7 @@ export function entropyToMnemonic(
     (binary: string): Buffer => {
       const index = binaryToByte(binary);
       wordlist = wordlist || [];
-      return Buffer.from(wordlist[index], 'utf8');
+      return Buffer.from(normalize(wordlist[index]), 'utf8');
     },
   );
 
@@ -248,7 +252,6 @@ export function entropyToMnemonic(
     },
     { workingBuffer: Buffer.alloc(bufferSize), offset: 0 },
   );
-
   return workingBuffer;
 }
 
