@@ -1,18 +1,18 @@
-var bip39 = require('../');
-var download = require('../util/wordlists').download;
+var bip39 = require('../')
+var download = require('../util/wordlists').download
 var WORDLISTS = {
   english: require('../src/wordlists/english.json'),
   japanese: require('../src/wordlists/japanese.json'),
-  custom: require('./wordlist.json'),
+  custom: require('./wordlist.json')
 };
 
-var vectors = require('./vectors.json');
-var test = require('tape');
+var vectors = require('./vectors.json')
+var test = require('tape')
 
-function testVector(description, wordlist, password, v, i) {
-  var ventropy = v[0];
-  var vmnemonic = v[1];
-  var vseedHex = v[2];
+function testVector (description, wordlist, password, v, i) {
+  var ventropy = v[0]
+  var vmnemonic = v[1]
+  var vseedHex = v[2]
 
   test('for ' + description + '(' + i + '), ' + ventropy, function (t) {
     t.plan(8)
@@ -35,7 +35,7 @@ function testVector(description, wordlist, password, v, i) {
   })
 }
 
-vectors.english.forEach(function(v, i) { testVector('English', undefined, 'TREZOR', v, i) });
+vectors.english.forEach(function(v, i) { testVector('English', undefined, 'TREZOR', v, i) })
 vectors.japanese.forEach(function (v, i) { testVector('Japanese', WORDLISTS.japanese, '㍍ガバヴァぱばぐゞちぢ十人十色', v, i) })
 vectors.custom.forEach(function (v, i) { testVector('Custom', WORDLISTS.custom, undefined, v, i) })
 
