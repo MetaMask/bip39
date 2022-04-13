@@ -1,12 +1,15 @@
 # BIP39
 
-[![Build Status](https://travis-ci.org/bitcoinjs/bip39.png?branch=master)](https://travis-ci.org/bitcoinjs/bip39)
-[![NPM](https://img.shields.io/npm/v/bip39.svg)](https://www.npmjs.org/package/bip39)
+[![NPM](https://img.shields.io/npm/v/bip39.svg)](https://www.npmjs.org/package/@metamask/bip39)
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 
 JavaScript implementation of [Bitcoin BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki): Mnemonic code for generating deterministic keys
+
+## MetaMask fork
+
+This is a temporary fork of the `bip39` package created by the MetaMask team. Please do not use this package for other projects, use `bip39` directly instead. We are not interested in maintaining this long-term. We will abandon this as soon as we find a suitable replacement, and will not be accepting community issues or PRs.
 
 ## Reminder for developers
 
