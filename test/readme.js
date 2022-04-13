@@ -6,7 +6,7 @@ const test = require('tape')
 test('README example 1', function (t) {
   // defaults to BIP39 English word list
   const entropy = 'ffffffffffffffffffffffffffffffff'
-  const mnemonic = bip39.entropyToMnemonic(entropy)
+  const mnemonic = bip39.entropyToMnemonic(entropy).toString();
 
   t.plan(2)
   t.equal(mnemonic, 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong')
@@ -24,7 +24,7 @@ test('README example 2', function (t) {
   const proxiedbip39 = proxyquire('../', stub)
 
   // mnemonic strength defaults to 128 bits
-  const mnemonic = proxiedbip39.generateMnemonic()
+  const mnemonic = proxiedbip39.generateMnemonic().toString();
 
   t.plan(2)
   t.equal(mnemonic, 'imitate robot frame trophy nuclear regret saddle around inflict case oil spice')

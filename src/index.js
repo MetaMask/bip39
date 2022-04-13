@@ -49,8 +49,12 @@ function deriveChecksumBits(entropyBuffer) {
 function salt(password) {
     return 'mnemonic' + (password || '');
 }
+// When the mnemonic argument is passed as a buffer, it should be
+// a buffer of a string that is normalized to NFKD format
 function mnemonicToSeedSync(mnemonic, password) {
-    const mnemonicBuffer = Buffer.from(normalize(mnemonic), 'utf8');
+    const mnemonicBuffer = typeof mnemonic === 'string'
+        ? Buffer.from(normalize(mnemonic), 'utf8')
+        : mnemonic;
     const saltBuffer = Buffer.from(salt(normalize(password)), 'utf8');
     return pbkdf2_1.pbkdf2Sync(mnemonicBuffer, saltBuffer, 2048, 64, 'sha512');
 }
@@ -63,19 +67,36 @@ function mnemonicToSeed(mnemonic, password) {
     });
 }
 exports.mnemonicToSeed = mnemonicToSeed;
+// When the mnemonic argument is passed as a buffer, it should be
+// a buffer of a string that is normalized to NFKD format
 function mnemonicToEntropy(mnemonic, wordlist) {
     wordlist = wordlist || DEFAULT_WORDLIST;
     if (!wordlist) {
         throw new Error(WORDLIST_REQUIRED);
     }
-    const words = normalize(mnemonic).split(' ');
+    const mnemonicAsBuffer = typeof mnemonic === 'string'
+        ? Buffer.from(normalize(mnemonic), 'utf8')
+        : mnemonic;
+    const words = [];
+    let currentWord = [];
+    for (const byte of mnemonicAsBuffer.values()) {
+        // split at space or \u3000 (ideographic space, for Japanese wordlists)
+        if (byte === 0x20 || byte === 0x3000) {
+            words.push(Buffer.from(currentWord));
+            currentWord = [];
+        }
+        else {
+            currentWord.push(byte);
+        }
+    }
+    words.push(Buffer.from(currentWord));
     if (words.length % 3 !== 0) {
         throw new Error(INVALID_MNEMONIC);
     }
     // convert word indices to 11 bit binary strings
     const bits = words
         .map((word) => {
-        const index = wordlist.indexOf(word);
+        const index = wordlist.indexOf(word.toString('utf8'));
         if (index === -1) {
             throw new Error(INVALID_MNEMONIC);
         }
@@ -127,13 +148,35 @@ function entropyToMnemonic(entropy, wordlist) {
     const checksumBits = deriveChecksumBits(entropy);
     const bits = entropyBits + checksumBits;
     const chunks = bits.match(/(.{1,11})/g);
-    const words = chunks.map((binary) => {
+    const wordsAsBuffers = chunks.map((binary) => {
         const index = binaryToByte(binary);
-        return wordlist[index];
+        wordlist = wordlist || [];
+        return Buffer.from(normalize(wordlist[index]), 'utf8');
     });
-    return wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
-        ? words.join('\u3000')
-        : words.join(' ');
+    const separator = wordlist[0] === '\u3042\u3044\u3053\u304f\u3057\u3093' // Japanese wordlist
+        ? '\u3000'
+        : ' ';
+    const separatorByteLength = Buffer.from(separator, 'utf8').length;
+    const bufferSize = wordsAsBuffers.reduce((currentBufferSize, wordAsBuffer, i) => {
+        const shouldAddSeparator = i < wordsAsBuffers.length - 1;
+        return (currentBufferSize +
+            wordAsBuffer.length +
+            (shouldAddSeparator ? separatorByteLength : 0));
+    }, 0);
+    const { workingBuffer } = wordsAsBuffers.reduce((result, wordAsBuffer, i) => {
+        const shouldAddSeparator = i < wordsAsBuffers.length - 1;
+        result.workingBuffer.set(wordAsBuffer, result.offset);
+        if (shouldAddSeparator) {
+            result.workingBuffer.write(separator, result.offset + wordAsBuffer.length, separatorByteLength, 'utf8');
+        }
+        return {
+            workingBuffer: result.workingBuffer,
+            offset: result.offset +
+                wordAsBuffer.length +
+                (shouldAddSeparator ? separatorByteLength : 0),
+        };
+    }, { workingBuffer: Buffer.alloc(bufferSize), offset: 0 });
+    return workingBuffer;
 }
 exports.entropyToMnemonic = entropyToMnemonic;
 function generateMnemonic(strength, rng, wordlist) {

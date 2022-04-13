@@ -4,7 +4,7 @@ var WORDLISTS = {
   english: require('../src/wordlists/english.json'),
   japanese: require('../src/wordlists/japanese.json'),
   custom: require('./wordlist.json')
-}
+};
 
 var vectors = require('./vectors.json')
 var test = require('tape')
@@ -15,22 +15,27 @@ function testVector (description, wordlist, password, v, i) {
   var vseedHex = v[2]
 
   test('for ' + description + '(' + i + '), ' + ventropy, function (t) {
-    t.plan(6)
+    t.plan(8)
 
     t.equal(bip39.mnemonicToEntropy(vmnemonic, wordlist), ventropy, 'mnemonicToEntropy returns ' + ventropy.slice(0, 40) + '...')
+    // and mnemonicToEntropy should work with mnemonic arg as type buffer
+    t.equal(bip39.mnemonicToEntropy(Buffer.from(vmnemonic.normalize('NFKD'), 'utf8'), wordlist), ventropy, 'mnemonicToEntropy returns ' + ventropy.slice(0, 40) + '...')
+
     t.equal(bip39.mnemonicToSeedSync(vmnemonic, password).toString('hex'), vseedHex, 'mnemonicToSeedSync returns ' + vseedHex.slice(0, 40) + '...')
+    // and mnemonicToSeedSync should work with mnemonic arg as type buffer
+    t.equal(bip39.mnemonicToSeedSync(Buffer.from(vmnemonic.normalize('NFKD'), 'utf8'), password).toString('hex'), vseedHex, 'mnemonicToSeedSync returns ' + vseedHex.slice(0, 40) + '...')
+
     bip39.mnemonicToSeed(vmnemonic, password).then(function (asyncSeed) {
       t.equal(asyncSeed.toString('hex'), vseedHex, 'mnemonicToSeed returns ' + vseedHex.slice(0, 40) + '...')
     })
-    t.equal(bip39.entropyToMnemonic(ventropy, wordlist), vmnemonic, 'entropyToMnemonic returns ' + vmnemonic.slice(0, 40) + '...')
-
+    t.equal(bip39.entropyToMnemonic(ventropy, wordlist).toString(), vmnemonic, 'entropyToMnemonic returns ' + vmnemonic.slice(0, 40) + '...')
     function rng () { return Buffer.from(ventropy, 'hex') }
-    t.equal(bip39.generateMnemonic(undefined, rng, wordlist), vmnemonic, 'generateMnemonic returns RNG entropy unmodified')
+    t.equal(bip39.generateMnemonic(undefined, rng, wordlist).toString(), vmnemonic, 'generateMnemonic returns RNG entropy unmodified')
     t.equal(bip39.validateMnemonic(vmnemonic, wordlist), true, 'validateMnemonic returns true')
   })
 }
 
-vectors.english.forEach(function (v, i) { testVector('English', undefined, 'TREZOR', v, i) })
+vectors.english.forEach(function(v, i) { testVector('English', undefined, 'TREZOR', v, i) })
 vectors.japanese.forEach(function (v, i) { testVector('Japanese', WORDLISTS.japanese, '㍍ガバヴァぱばぐゞちぢ十人十色', v, i) })
 vectors.custom.forEach(function (v, i) { testVector('Custom', WORDLISTS.custom, undefined, v, i) })
 
@@ -51,12 +56,12 @@ test('setDefaultWordlist changes default wordlist', function (t) {
   const italian = bip39.getDefaultWordlist()
   t.equal(italian, 'italian')
 
-  const phraseItalian = bip39.entropyToMnemonic('00000000000000000000000000000000')
+  const phraseItalian = bip39.entropyToMnemonic('00000000000000000000000000000000').toString();
   t.equal(phraseItalian.slice(0, 5), 'abaco')
 
   bip39.setDefaultWordlist('english')
 
-  const phraseEnglish = bip39.entropyToMnemonic('00000000000000000000000000000000')
+  const phraseEnglish = bip39.entropyToMnemonic('00000000000000000000000000000000').toString();
   t.equal(phraseEnglish.slice(0, 7), 'abandon')
 })
 
@@ -106,7 +111,7 @@ test('UTF8 passwords', function (t) {
 })
 
 test('generateMnemonic can vary entropy length', function (t) {
-  var words = bip39.generateMnemonic(160).split(' ')
+  var words = bip39.generateMnemonic(160).toString().split(' ')
 
   t.plan(1)
   t.equal(words.length, 15, 'can vary generated entropy bit length')
