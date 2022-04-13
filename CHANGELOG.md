@@ -1,3 +1,10 @@
+# 4.0.0
+__changed__
+- *BREAKING*: Change the return type of `entropyToMnemonic` and `generateMnemonic` from `string` to `Buffer` (#1)
+- Add support for passing in mnemonic as a `Buffer` to `mnemonicToSeedSync` and `mnemonicToEntropy` (#1)
+  - Note that the `Buffer` must contain an NFKD normalized mnemonic. This will not work correctly if the mnemonic is improperly normalized.
+- Rename this package to `@metamask/bip39` so that we can publish it as a fork of `bip39` (#2)
+
 # 3.0.0
 __added__
 - Added TypeScript support (#104)

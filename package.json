@@ -1,6 +1,6 @@
 {
   "name": "@metamask/bip39",
-  "version": "3.0.4",
+  "version": "4.0.0",
   "description": "Bitcoin BIP39: Mnemonic code for generating deterministic keys",
   "main": "src/index.js",
   "types": "./types/index.d.ts",
