@@ -3,8 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const createHash = require("create-hash");
 const pbkdf2_1 = require("pbkdf2");
 const randomBytes = require("randombytes");
-const _wordlists_1 = require("./_wordlists");
-let DEFAULT_WORDLIST = _wordlists_1._default;
+const DEFAULT_WORDLIST = require('./wordlists/english.json');
 const INVALID_MNEMONIC = 'Invalid mnemonic';
 const INVALID_ENTROPY = 'Invalid entropy';
 const INVALID_CHECKSUM = 'Invalid mnemonic checksum';
@@ -198,27 +197,3 @@ function validateMnemonic(mnemonic, wordlist) {
     return true;
 }
 exports.validateMnemonic = validateMnemonic;
-function setDefaultWordlist(language) {
-    const result = _wordlists_1.wordlists[language];
-    if (result) {
-        DEFAULT_WORDLIST = result;
-    }
-    else {
-        throw new Error('Could not find wordlist for language "' + language + '"');
-    }
-}
-exports.setDefaultWordlist = setDefaultWordlist;
-function getDefaultWordlist() {
-    if (!DEFAULT_WORDLIST) {
-        throw new Error('No Default Wordlist set');
-    }
-    return Object.keys(_wordlists_1.wordlists).filter((lang) => {
-        if (lang === 'JA' || lang === 'EN') {
-            return false;
-        }
-        return _wordlists_1.wordlists[lang].every((word, index) => word === DEFAULT_WORDLIST[index]);
-    })[0];
-}
-exports.getDefaultWordlist = getDefaultWordlist;
-var _wordlists_2 = require("./_wordlists");
-exports.wordlists = _wordlists_2.wordlists;
