@@ -1,9 +1,9 @@
 import * as createHash from 'create-hash';
 import { pbkdf2, pbkdf2Sync } from 'pbkdf2';
 import * as randomBytes from 'randombytes';
-import { _default as _DEFAULT_WORDLIST, wordlists } from './_wordlists';
-
-let DEFAULT_WORDLIST: string[] | undefined = _DEFAULT_WORDLIST;
+const DEFAULT_WORDLIST = require('./wordlists/english.json') as
+  | string[]
+  | undefined;
 
 const INVALID_MNEMONIC = 'Invalid mnemonic';
 const INVALID_ENTROPY = 'Invalid entropy';
@@ -281,31 +281,3 @@ export function validateMnemonic(
 
   return true;
 }
-
-export function setDefaultWordlist(language: string): void {
-  const result = wordlists[language];
-  if (result) {
-    DEFAULT_WORDLIST = result;
-  } else {
-    throw new Error('Could not find wordlist for language "' + language + '"');
-  }
-}
-
-export function getDefaultWordlist(): string {
-  if (!DEFAULT_WORDLIST) {
-    throw new Error('No Default Wordlist set');
-  }
-  return Object.keys(wordlists).filter(
-    (lang: string): boolean => {
-      if (lang === 'JA' || lang === 'EN') {
-        return false;
-      }
-      return wordlists[lang].every(
-        (word: string, index: number): boolean =>
-          word === DEFAULT_WORDLIST![index],
-      );
-    },
-  )[0];
-}
-
-export { wordlists } from './_wordlists';
