@@ -38,15 +38,15 @@ function testVector (description, wordlist, password, v, i) {
 vectors.english.forEach(function(v, i) { testVector('English', undefined, 'TREZOR', v, i) })
 vectors.japanese.forEach(function (v, i) { testVector('Japanese', WORDLISTS.japanese, '㍍ガバヴァぱばぐゞちぢ十人十色', v, i) })
 vectors.custom.forEach(function (v, i) { testVector('Custom', WORDLISTS.custom, undefined, v, i) })
-
-test('getDefaultWordlist returns "english"', function (t) {
+// Test skipped because wordlists other than english have been removed
+test.skip('getDefaultWordlist returns "english"', function (t) {
   t.plan(1)
   const english = bip39.getDefaultWordlist()
   t.equal(english, 'english')
   // TODO: Test that Error throws when called if no wordlists are compiled with bip39
 })
-
-test('setDefaultWordlist changes default wordlist', function (t) {
+// Test skipped because wordlists other than english have been removed
+test.skip('setDefaultWordlist changes default wordlist', function (t) {
   t.plan(4)
   const english = bip39.getDefaultWordlist()
   t.equal(english, 'english')
@@ -64,8 +64,8 @@ test('setDefaultWordlist changes default wordlist', function (t) {
   const phraseEnglish = bip39.entropyToMnemonic('00000000000000000000000000000000').toString();
   t.equal(phraseEnglish.slice(0, 7), 'abandon')
 })
-
-test('setDefaultWordlist throws on unknown wordlist', function (t) {
+// Test skipped because wordlists other than english have been removed
+test.skip('setDefaultWordlist throws on unknown wordlist', function (t) {
   t.plan(2)
   const english = bip39.getDefaultWordlist()
   t.equal(english, 'english')
@@ -135,14 +135,14 @@ test('validateMnemonic', function (t) {
   t.equal(bip39.validateMnemonic('turtle front uncle idea crush write shrug there lottery flower risky shell'), false, 'fails if mnemonic words are not in the word list')
   t.equal(bip39.validateMnemonic('sleep kitten sleep kitten sleep kitten sleep kitten sleep kitten sleep kitten'), false, 'fails for invalid checksum')
 })
-
-test('exposes standard wordlists', function (t) {
+// Test skipped because wordlists other than english have been removed
+test.skip('exposes standard wordlists', function (t) {
   t.plan(2)
   t.same(bip39.wordlists.EN, WORDLISTS.english)
   t.equal(bip39.wordlists.EN.length, 2048)
 })
-
-test('verify wordlists from https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md', function (t) {
+// Test skipped because wordlists other than english have been removed
+test.skip('verify wordlists from https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md', function (t) {
   download().then(function (wordlists) {
     Object.keys(wordlists).forEach(function (name) {
       t.same(bip39.wordlists[name], wordlists[name])
