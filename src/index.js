@@ -37,6 +37,20 @@ function binaryToByte(bin) {
 function bytesToBinary(bytes) {
     return bytes.map((x) => lpad(x.toString(2), '0', 8)).join('');
 }
+// Compares two checksum bit strings without leaking prefix-match length
+// through timing. Both inputs have equal length here (CS bits derived from
+// ENT), so a mismatch-time short-circuit would otherwise reveal how many
+// leading checksum bits of an attacker-supplied mnemonic are correct.
+function checksumBitsEqual(a, b) {
+    if (a.length !== b.length) {
+        return false;
+    }
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) {
+        diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+    return diff === 0;
+}
 function deriveChecksumBits(entropyBuffer) {
     const ENT = entropyBuffer.length * 8;
     const CS = ENT / 32;
@@ -119,7 +133,9 @@ function mnemonicToEntropy(mnemonic, wordlist) {
     }
     const entropy = Buffer.from(entropyBytes);
     const newChecksum = deriveChecksumBits(entropy);
-    if (newChecksum !== checksumBits) {
+    // Compare in constant time so a remote validation oracle cannot leak how
+    // many leading checksum bits of the supplied mnemonic match.
+    if (!checksumBitsEqual(newChecksum, checksumBits)) {
         throw new Error(INVALID_CHECKSUM);
     }
     return entropy.toString('hex');
@@ -127,6 +143,15 @@ function mnemonicToEntropy(mnemonic, wordlist) {
 exports.mnemonicToEntropy = mnemonicToEntropy;
 function entropyToMnemonic(entropy, wordlist) {
     if (!Buffer.isBuffer(entropy)) {
+        // Reject malformed hex up front: Buffer.from(value, 'hex') silently
+        // truncates at the first invalid byte pair (and drops a trailing
+        // incomplete byte), which would derive a *different* mnemonic than the
+        // caller intended without any error.
+        if (typeof entropy !== 'string' ||
+            entropy.length % 2 !== 0 ||
+            !/^[0-9a-fA-F]*$/.test(entropy)) {
+            throw new Error(INVALID_ENTROPY);
+        }
         entropy = Buffer.from(entropy, 'hex');
     }
     wordlist = wordlist || DEFAULT_WORDLIST;
@@ -175,6 +200,8 @@ function entropyToMnemonic(entropy, wordlist) {
                 (shouldAddSeparator ? separatorByteLength : 0),
         };
     }, { workingBuffer: Buffer.alloc(bufferSize), offset: 0 });
+    // Preserve the MetaMask/bip39 fork contract: return a raw Buffer to prevent
+    // sensitive mnemonic seed phrases from entering the JavaScript string heap.
     return workingBuffer;
 }
 exports.entropyToMnemonic = entropyToMnemonic;
@@ -192,7 +219,16 @@ function validateMnemonic(mnemonic, wordlist) {
         mnemonicToEntropy(mnemonic, wordlist);
     }
     catch (e) {
-        return false;
+        // Only validation failures map to `false`. Unexpected errors (missing
+        // wordlist configuration, programmer errors such as non-string input)
+        // are rethrown so misconfiguration cannot be mistaken for a bad phrase.
+        if (e instanceof Error &&
+            (e.message === INVALID_MNEMONIC ||
+                e.message === INVALID_ENTROPY ||
+                e.message === INVALID_CHECKSUM)) {
+            return false;
+        }
+        throw e;
     }
     return true;
 }
